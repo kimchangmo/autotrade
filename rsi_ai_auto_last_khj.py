@@ -106,7 +106,6 @@ all_coin.remove('KRW-BTC')
 all_coin.remove('KRW-SXP')
 all_coin.remove('KRW-BTT')
 all_coin.remove('KRW-KNC')
-all_coin.remove('KRW-REP')
 all_coin.remove('KRW-MBL')
 all_coin.remove('KRW-XRP')
 all_coin.remove('KRW-XEM')
@@ -117,8 +116,6 @@ all_coin.remove('KRW-JST')
 all_coin.remove('KRW-ENJ')
 all_coin.remove('KRW-VET')
 all_coin.remove('KRW-MED')
-all_coin.remove('KRW-ARK')
-all_coin.remove('KRW-GAS')
 # 자동매매 시작
 #while True:
 rsi_name = [] #상승예상코인명
@@ -319,7 +316,6 @@ while True:
                 all_coin.remove('KRW-SXP')
                 all_coin.remove('KRW-BTT')
                 all_coin.remove('KRW-KNC')
-                all_coin.remove('KRW-REP')
                 all_coin.remove('KRW-MBL')
                 all_coin.remove('KRW-XRP')
                 all_coin.remove('KRW-XEM')
@@ -330,9 +326,7 @@ while True:
                 all_coin.remove('KRW-ENJ')
                 all_coin.remove('KRW-VET')
                 all_coin.remove('KRW-MED')
-                all_coin.remove('KRW-ARK')
-                all_coin.remove('KRW-GAS')
-
+                
                 #price_name.append(coin)
                 #price_gap.append(predicted_close_price/current_price)
                 #price_gap_desc.append(predicted_close_price/current_price)
