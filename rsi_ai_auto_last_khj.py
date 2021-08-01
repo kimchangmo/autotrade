@@ -194,6 +194,7 @@ while True:
                         upbit.buy_market_order(buycoin_0, 80000)
                         water_current_price1_1 = get_current_price(buycoin_0)
                         #water_buy_price_0 = (buy_price_0 + water_current_price1_1)/2
+                        time.sleep(1)
                         water_buy_price_0 = 130000/(upbit.get_balance(buycoin_0[4:]))
                     web1_1 = 'true'
                 elif (count1 == 'false') and ((buy_price_0 * 0.94) > (get_current_price(buycoin_0))) and (web1_2 == 'false'):
@@ -202,6 +203,7 @@ while True:
                         upbit.buy_market_order(buycoin_0, 170000) 
                         water_current_price1_2 = get_current_price(buycoin_0)
                         #water_buy_price_0 = (buy_price_0 + water_current_price1_1 + water_current_price1_2)/3
+                        time.sleep(1)
                         water_buy_price_0 = 300000/(upbit.get_balance(buycoin_0[4:]))
                     web1_2 = 'true'
                 #물타기 종료
@@ -226,6 +228,7 @@ while True:
                         upbit.buy_market_order(buycoin_1, 80000)
                         water_current_price2_1 = get_current_price(buycoin_1)
                         #water_buy_price_1 = (buy_price_1 + water_current_price2_1)/2
+                        time.sleep(1)
                         water_buy_price_1 = 130000/(upbit.get_balance(buycoin_1[4:]))
                     web2_1 = 'true'
                 elif (count2 == 'false') and ((buy_price_1 * 0.94) > (get_current_price(buycoin_1))) and (web2_2 == 'false'):
@@ -234,6 +237,7 @@ while True:
                         upbit.buy_market_order(buycoin_1, 170000)
                         water_current_price2_2 = get_current_price(buycoin_1)
                         #water_buy_price_1 = (buy_price_1 + water_current_price2_1 + water_current_price2_2)/3
+                        time.sleep(1)
                         water_buy_price_1 = 300000/(upbit.get_balance(buycoin_1[4:]))
                     web2_2 = 'true'
                 #물타기 종료
@@ -258,6 +262,7 @@ while True:
                         upbit.buy_market_order(buycoin_2, 80000)
                         water_current_price3_1 = get_current_price(buycoin_2)
                         #water_buy_price_2 = (buy_price_2 + water_current_price3_1)/2
+                        time.sleep(1)
                         water_buy_price_2 = 130000/(upbit.get_balance(buycoin_2[4:]))
                     web3_1 = 'true'
                 elif (count3 == 'false') and ((buy_price_2 * 0.94) > (get_current_price(buycoin_2))) and (web3_2 == 'false'):
@@ -266,6 +271,7 @@ while True:
                         upbit.buy_market_order(buycoin_2, 170000)
                         water_current_price3_2 = get_current_price(buycoin_2)
                         #water_buy_price_2 = (buy_price_2 + water_current_price3_1 + water_current_price3_2)/3
+                        time.sleep(1)
                         water_buy_price_2 = 300000/(upbit.get_balance(buycoin_2[4:]))
                     web3_2 = 'true'
                 #물타기 종료
