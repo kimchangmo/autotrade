@@ -8,8 +8,8 @@ import pandas as pd
 import webbrowser
 import json
 
-access = "GauxnmxqFhWqPmxPDgfrLxx4zNF2V66N5MZ1A3X8"
-secret = "X5BYYzfckghA2IRbTG46caZw4xbdzxXcGoxquMtK"
+access = "4XJ0xegCx1iTlI7EJq0jxvP3YW1NXnjmxutPLQAO"
+secret = "xfQYWVxTXl8nolwLumpxXeleIxxSfzdLHXgKdPIB"
 
 def get_start_time(ticker):
     """시작 시간 조회"""
@@ -83,8 +83,13 @@ def rsiindex(symbol):
 upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
 all_coin = pyupbit.get_tickers('KRW')
-all_coin.remove('KRW-MED')
-all_coin.remove('KRW-CRE')
+all_coin.remove('KRW-ETH')
+all_coin.remove('KRW-ETC')
+all_coin.remove('KRW-BTT')
+all_coin.remove('KRW-BCH')
+all_coin.remove('KRW-KAVA')
+all_coin.remove('KRW-XEM')
+all_coin.remove('KRW-XEC')
 
 rsi_list = [] #rsi 목록
 #rsi_name = [] #상승예상코인명
@@ -174,7 +179,7 @@ while True:
                 #1번구매코인 익절/손절
                 if (count1 == 'false') :
                     rsiindex(buycoin_0)
-                if (count1 == 'false') and (rsi > 50) :
+                if (count1 == 'false') and (rsi > 60) :
                     btc_0 = upbit.get_balance(buycoin_0[4:])
                     upbit.sell_market_order(buycoin_0, btc_0)
                     count1 = 'true'
@@ -186,7 +191,7 @@ while True:
                 #2번구매코인 익절/손절
                 if (count2 == 'false') :
                     rsiindex(buycoin_1)
-                if (count2 == 'false') and (rsi > 50) :
+                if (count2 == 'false') and (rsi > 60) :
                     btc_1 = upbit.get_balance(buycoin_1[4:])
                     upbit.sell_market_order(buycoin_1, btc_1)
                     count2 = 'true'
@@ -198,7 +203,7 @@ while True:
                 #3번구매코인 익절/손절
                 if (count3 == 'false') :
                     rsiindex(buycoin_2)
-                if (count3 == 'false') and (rsi > 50) :
+                if (count3 == 'false') and (rsi > 60) :
                     btc_2 = upbit.get_balance(buycoin_2[4:])
                     upbit.sell_market_order(buycoin_2, btc_2)
                     count3 = 'true'
