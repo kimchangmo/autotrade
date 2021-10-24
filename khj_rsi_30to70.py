@@ -179,7 +179,7 @@ while True:
                 #1번구매코인 익절/손절
                 if (count1 == 'false') :
                     rsiindex(buycoin_0)
-                if (count1 == 'false') and (rsi > 60) :
+                if (count1 == 'false') and (rsi > 70) :
                     btc_0 = upbit.get_balance(buycoin_0[4:])
                     upbit.sell_market_order(buycoin_0, btc_0)
                     count1 = 'true'
@@ -191,7 +191,7 @@ while True:
                 #2번구매코인 익절/손절
                 if (count2 == 'false') :
                     rsiindex(buycoin_1)
-                if (count2 == 'false') and (rsi > 60) :
+                if (count2 == 'false') and (rsi > 70) :
                     btc_1 = upbit.get_balance(buycoin_1[4:])
                     upbit.sell_market_order(buycoin_1, btc_1)
                     count2 = 'true'
@@ -203,7 +203,7 @@ while True:
                 #3번구매코인 익절/손절
                 if (count3 == 'false') :
                     rsiindex(buycoin_2)
-                if (count3 == 'false') and (rsi > 60) :
+                if (count3 == 'false') and (rsi > 70) :
                     btc_2 = upbit.get_balance(buycoin_2[4:])
                     upbit.sell_market_order(buycoin_2, btc_2)
                     count3 = 'true'
@@ -224,21 +224,21 @@ while True:
                 print("only sell...")
                 if (count1 == 'false') :
                     rsiindex(buycoin_0)
-                if (count1 == 'false') and (rsi > 50) :
+                if (count1 == 'false') and (rsi > 70) :
                     btc_0 = upbit.get_balance(buycoin_0[4:])
                     upbit.sell_market_order(buycoin_0, btc_0)
                     count1 = 'true'
                     
                 if (count2 == 'false') :
                     rsiindex(buycoin_1)
-                if (count2 == 'false') and (rsi > 50) :
+                if (count2 == 'false') and (rsi > 70) :
                     btc_1 = upbit.get_balance(buycoin_1[4:])
                     upbit.sell_market_order(buycoin_1, btc_1)
                     count2 = 'true'
                     
                 if (count3 == 'false') :
                     rsiindex(buycoin_2)
-                if (count3 == 'false') and (rsi > 50) :
+                if (count3 == 'false') and (rsi > 70) :
                     btc_2 = upbit.get_balance(buycoin_2[4:])
                     upbit.sell_market_order(buycoin_2, btc_2)
                     count3 = 'true'
