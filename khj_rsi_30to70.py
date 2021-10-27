@@ -53,30 +53,36 @@ def predict_price(ticker):
     predicted_close_price = closeValue
 
 rsi = 0
+oldrsi = 0
 def rsiindex(symbol):
     global rsi
-    url = "https://api.upbit.com/v1/candles/minutes/3"
+    global oldrsi
+    url = "https://api.upbit.com/v1/candles/minutes/60"
     querystring = {"market":symbol,"count":"500"}
     response = requests.request("GET", url, params=querystring)
     data = response.json()
     df = pd.DataFrame(data)
     df=df.reindex(index=df.index[::-1]).reset_index()
-    df['close']=df["trade_price"]
+    bit_mask = df['index'] > 0
     
     def rsi(ohlc: pd.DataFrame, period: int = 14):
-        ohlc["close"] = ohlc["close"]
-        delta = ohlc["close"].diff()
-        up, down = delta.copy(), delta.copy()
-        up[up < 0] = 0
-        down[down > 0] = 0
-        _gain = up.ewm(com=(period - 1), min_periods=period).mean()
-        _loss = down.abs().ewm(com=(period - 1), min_periods=period).mean()
+        ohlc["trade_price"] = ohlc["trade_price"]
+        delta = ohlc["trade_price"].diff()
+        gains, declines = delta.copy(), delta.copy()
+        gains[gains < 0] = 0
+        declines[declines > 0] = 0
+
+        _gain = gains.ewm(com=(period - 1), min_periods=period).mean()
+        _loss = declines.abs().ewm(com=(period - 1), min_periods=period).mean()
+
         RS = _gain / _loss
         return pd.Series(100 - (100 / (1 + RS)), name="RSI")
 
+    oldrsi = rsi(df[bit_mask], 14).iloc[-1]
     rsi = rsi(df, 14).iloc[-1]
-    #print(symbol)
-    #print('Upbit 3 minute RSI:', rsi)
+    print(symbol)
+    print('Upbit 3 minute oldRSI:', oldrsi)
+    print('Upbit now RSI:', rsi)
     #print('')
 
 # 로그인
@@ -91,49 +97,18 @@ all_coin.remove('KRW-KAVA')
 all_coin.remove('KRW-XEM')
 all_coin.remove('KRW-XEC')
 
-rsi_list = [] #rsi 목록
-#rsi_name = [] #상승예상코인명
-#rsi_list_desc = []
-#price_name = [] #상승예상코인명
-#price_gap = [] #상승예상수치
-#price_gap_desc = []
-
 #1,2,3번코인 구매여부(true = 구매가능, false = 구매불가)
 count1 = 'true'
 count2 = 'true'
 count3 = 'true'
+count4 = 'true'
+count5 = 'true'
+count6 = 'true'
+count7 = 'true'
+count8 = 'true'
+count9 = 'true'
+count10 = 'true'
 
-#전체코인 rsi 정보 array 만들고 시작
-"""
-----------------------------------수정필요---------------------------------
-k = 0
-while k < len(all_coin) :
-    try:
-        data = {
-            'coinName' : all_coin[n],
-            'rsi' : rsiindex(all_coin[n])
-        }
-        
-        global json_rsi_info = json.dumps(data)
-        
-    except Exception as e:
-        print(e)
-        time.sleep(1)
-json_rsi_dict = json.loads(json_rsi_info)
-----------------------------------수정필요---------------------------------
-"""
-k = 0
-while k < len(all_coin) :
-    try:
-        print("find rsi ing...")
-        rsiindex(all_coin[k])
-        rsi_list.append(rsi)
-        k = k+1
-    except Exception as e:
-        print(e)
-        time.sleep(1)
-print("rsi_list_length",len(rsi_list))
-print("coin_length",len(all_coin))
 # 자동매매 시작
 while True:
     n = 0
@@ -147,34 +122,121 @@ while True:
             end_time = start_time + datetime.timedelta(days=1)
 
             if start_time + datetime.timedelta(seconds=600) < now < end_time - datetime.timedelta(seconds=60):
-                print("ing... :",  coin)
+                #print("ing... :",  coin)
                 current_price = get_current_price(coin)
                 #rsi 확인
                 rsiindex(coin)
-                print("old_rsi :",  rsi_list[n])
-                print("now_rsi :",  rsi)
-                if (30 > rsi_list[n]) and (30 < rsi) and (count1 == 'true' or count2 == 'true' or count3 == 'true') and (upbit.get_balance(coin[4:]) == 0):
+                if (30 > oldrsi) and (30 < rsi) and (count1 == 'true' or count2 == 'true' or count3 == 'true' or count4 == 'true' or count5 == 'true' or count6 == 'true' or count7 == 'true' or count8 == 'true' or count9 == 'true' or count10 == 'true') and (upbit.get_balance(coin[4:]) == 0):
                     if count1 == 'true':
-                        upbit.buy_market_order(coin, 50000)
-                        buycoin_0 = coin
-                        buy_price_0 = current_price
-                        print("buy coin 1:",  buycoin_0)
-                        count1 = 'false'
-                        time.sleep(5)
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_0 = coin
+                            buy_price_0 = current_price
+                            print("buy coin 1:",  buycoin_0)
+                            count1 = 'false'
+                            #구매시간
+                            buytime1 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
                     elif count2 == 'true':
-                        upbit.buy_market_order(coin, 50000)
-                        buycoin_1 = coin
-                        buy_price_1 = current_price
-                        print("buy coin 2:",  buycoin_1)
-                        count2 = 'false'
-                        time.sleep(5)
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_1 = coin
+                            buy_price_1 = current_price
+                            print("buy coin 2:",  buycoin_1)
+                            count2 = 'false'
+                            #구매시간
+                            buytime2 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
                     elif count3 == 'true':
-                        upbit.buy_market_order(coin, 50000)
-                        buycoin_2 = coin
-                        buy_price_2 = current_price
-                        print("buy coin 3:",  buycoin_2)
-                        count3 = 'false'
-                        time.sleep(5)
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_2 = coin
+                            buy_price_2 = current_price
+                            print("buy coin 3:",  buycoin_2)
+                            count3 = 'false'
+                            #구매시간
+                            buytime3 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count4 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_3 = coin
+                            buy_price_3 = current_price
+                            print("buy coin 4:",  buycoin_3)
+                            count4 = 'false'
+                            #구매시간
+                            buytime4 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count5 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_4 = coin
+                            buy_price_4 = current_price
+                            print("buy coin 5:",  buycoin_4)
+                            count5 = 'false'
+                            #구매시간
+                            buytime5 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count6 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_5 = coin
+                            buy_price_5 = current_price
+                            print("buy coin 6:",  buycoin_5)
+                            count6 = 'false'
+                            #구매시간
+                            buytime6 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count7 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_6 = coin
+                            buy_price_6 = current_price
+                            print("buy coin 7:",  buycoin_6)
+                            count7 = 'false'
+                            #구매시간
+                            buytime7 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count8 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_7 = coin
+                            buy_price_7 = current_price
+                            print("buy coin 8:",  buycoin_7)
+                            count8 = 'false'
+                            #구매시간
+                            buytime8 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count9 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_8 = coin
+                            buy_price_8 = current_price
+                            print("buy coin 9:",  buycoin_8)
+                            count9 = 'false'
+                            #구매시간
+                            buytime9 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
+                    elif count10 == 'true':
+                        krw = get_balance("KRW")
+                        if krw > 200000:
+                            upbit.buy_market_order(coin, 200000)
+                            buycoin_9 = coin
+                            buy_price_9 = current_price
+                            print("buy coin 10:",  buycoin_9)
+                            count10 = 'false'
+                            #구매시간
+                            buytime10 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                            time.sleep(3)
                         
                 #1번구매코인 익절/손절
                 if (count1 == 'false') :
@@ -183,11 +245,15 @@ while True:
                     btc_0 = upbit.get_balance(buycoin_0[4:])
                     upbit.sell_market_order(buycoin_0, btc_0)
                     count1 = 'true'
-                #elif (count1 == 'false') :
-                #    btc_0 = upbit.get_balance(buycoin_0[4:])
-                #    upbit.sell_market_order(buycoin_0, btc_0)
-                #    count1 = 'true'
-
+                #다시 돌파시 물타기
+                #elif (count1 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime1):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_0, 50000)
+                #        #구매시간 갱신
+                #        buytime1 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
                 #2번구매코인 익절/손절
                 if (count2 == 'false') :
                     rsiindex(buycoin_1)
@@ -195,10 +261,14 @@ while True:
                     btc_1 = upbit.get_balance(buycoin_1[4:])
                     upbit.sell_market_order(buycoin_1, btc_1)
                     count2 = 'true'
-                #elif (count2 == 'false') :
-                #    btc_1 = upbit.get_balance(buycoin_1[4:])
-                #    upbit.sell_market_order(buycoin_1, btc_1)
-                #    count2 = 'true'
+                #다시 돌파시 물타기
+                #elif (count2 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime2):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_1, 50000)
+                #        #구매시간 갱신
+                #        buytime2 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
                     
                 #3번구매코인 익절/손절
                 if (count3 == 'false') :
@@ -207,10 +277,126 @@ while True:
                     btc_2 = upbit.get_balance(buycoin_2[4:])
                     upbit.sell_market_order(buycoin_2, btc_2)
                     count3 = 'true'
-                #elif (count3 == 'false') :
-                #    btc_2 = upbit.get_balance(buycoin_2[4:])
-                #    upbit.sell_market_order(buycoin_2, btc_2)
-                #    count3 = 'true'
+                #다시 돌파시 물타기
+                #elif (count3 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime3):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_2, 50000)
+                #        #구매시간 갱신
+                #        buytime3 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                    
+                #4번구매코인 익절/손절
+                if (count4 == 'false') :
+                    rsiindex(buycoin_3)
+                if (count4 == 'false') and (rsi > 70) :
+                    btc_3 = upbit.get_balance(buycoin_3[4:])
+                    upbit.sell_market_order(buycoin_3, btc_3)
+                    count4 = 'true'
+                #다시 돌파시 물타기
+                #elif (count4 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime4):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_3, 50000)
+                #        #구매시간 갱신
+                #        buytime4 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #5번구매코인 익절/손절
+                if (count5 == 'false') :
+                    rsiindex(buycoin_4)
+                if (count5 == 'false') and (rsi > 70) :
+                    btc_4 = upbit.get_balance(buycoin_4[4:])
+                    upbit.sell_market_order(buycoin_4, btc_4)
+                    count5 = 'true'
+                #다시 돌파시 물타기
+                #elif (count5 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime5):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_4, 50000)
+                #        #구매시간 갱신
+                #        buytime5 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #6번구매코인 익절/손절
+                if (count6 == 'false') :
+                    rsiindex(buycoin_5)
+                if (count6 == 'false') and (rsi > 70) :
+                    btc_5 = upbit.get_balance(buycoin_5[4:])
+                    upbit.sell_market_order(buycoin_5, btc_5)
+                    count6 = 'true'
+                #다시 돌파시 물타기
+                #elif (count6 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime6):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_5, 50000)
+                #        #구매시간 갱신
+                #        buytime6 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #7번구매코인 익절/손절
+                if (count7 == 'false') :
+                    rsiindex(buycoin_6)
+                if (count7 == 'false') and (rsi > 70) :
+                    btc_6 = upbit.get_balance(buycoin_6[4:])
+                    upbit.sell_market_order(buycoin_6, btc_6)
+                    count7 = 'true'
+                #다시 돌파시 물타기
+                #elif (count7 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime7):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_6, 50000)
+                #        #구매시간 갱신
+                #        buytime7 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #8번구매코인 익절/손절
+                if (count8 == 'false') :
+                    rsiindex(buycoin_7)
+                if (count8 == 'false') and (rsi > 70) :
+                    btc_7 = upbit.get_balance(buycoin_7[4:])
+                    upbit.sell_market_order(buycoin_7, btc_7)
+                    count8 = 'true'
+                #다시 돌파시 물타기
+                #elif (count8 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime8):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_7, 50000)
+                #        #구매시간 갱신
+                #        buytime8 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #9번구매코인 익절/손절
+                if (count9 == 'false') :
+                    rsiindex(buycoin_8)
+                if (count9 == 'false') and (rsi > 70) :
+                    btc_8 = upbit.get_balance(buycoin_8[4:])
+                    upbit.sell_market_order(buycoin_8, btc_8)
+                    count9 = 'true'
+                #다시 돌파시 물타기
+                #elif (count9 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime9):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_8, 50000)
+                #        #구매시간 갱신
+                #        buytime9 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #10번구매코인 익절/손절
+                if (count10 == 'false') :
+                    rsiindex(buycoin_9)
+                if (count10 == 'false') and (rsi > 70) :
+                    btc_9 = upbit.get_balance(buycoin_9[4:])
+                    upbit.sell_market_order(buycoin_9, btc_9)
+                    count10 = 'true'
+                #다시 돌파시 물타기
+                #elif (count10 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime10):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_9, 50000)
+                #        #구매시간 갱신
+                #        buytime10 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
 
                 #수동판매 대응
                 if (count1 == 'false') and (upbit.get_balance(buycoin_0[4:]) == 0) :
@@ -219,92 +405,184 @@ while True:
                     count2 = 'true'
                 if (count3 == 'false') and (upbit.get_balance(buycoin_2[4:]) == 0) :
                     count3 = 'true'
+                if (count4 == 'false') and (upbit.get_balance(buycoin_3[4:]) == 0) :
+                    count4 = 'true'
+                if (count5 == 'false') and (upbit.get_balance(buycoin_4[4:]) == 0) :
+                    count5 = 'true'
+                if (count6 == 'false') and (upbit.get_balance(buycoin_5[4:]) == 0) :
+                    count6 = 'true'
+                if (count7 == 'false') and (upbit.get_balance(buycoin_6[4:]) == 0) :
+                    count7 = 'true'
+                if (count8 == 'false') and (upbit.get_balance(buycoin_7[4:]) == 0) :
+                    count8 = 'true'
+                if (count9 == 'false') and (upbit.get_balance(buycoin_8[4:]) == 0) :
+                    count9 = 'true'
+                if (count10 == 'false') and (upbit.get_balance(buycoin_9[4:]) == 0) :
+                    count10 = 'true'                    
 
             else:
-                print("only sell...")
+                #1번구매코인 익절/손절
                 if (count1 == 'false') :
                     rsiindex(buycoin_0)
                 if (count1 == 'false') and (rsi > 70) :
                     btc_0 = upbit.get_balance(buycoin_0[4:])
                     upbit.sell_market_order(buycoin_0, btc_0)
                     count1 = 'true'
-                    
+                #다시 돌파시 물타기
+                #elif (count1 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime1):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_0, 50000)
+                #        #구매시간 갱신
+                #        buytime1 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #2번구매코인 익절/손절
                 if (count2 == 'false') :
                     rsiindex(buycoin_1)
                 if (count2 == 'false') and (rsi > 70) :
                     btc_1 = upbit.get_balance(buycoin_1[4:])
                     upbit.sell_market_order(buycoin_1, btc_1)
                     count2 = 'true'
+                #다시 돌파시 물타기
+                #elif (count2 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime2):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_1, 50000)
+                #        #구매시간 갱신
+                #        buytime2 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
                     
+                #3번구매코인 익절/손절
                 if (count3 == 'false') :
                     rsiindex(buycoin_2)
                 if (count3 == 'false') and (rsi > 70) :
                     btc_2 = upbit.get_balance(buycoin_2[4:])
                     upbit.sell_market_order(buycoin_2, btc_2)
                     count3 = 'true'
-            
-            #rsi 정보 업데이트
-            #print("what coin : ",  coin)
-            #print("old_rsi : ", rsi_list[n])
-            rsiindex(coin)
-            rsi_list[n] = rsi
-            #print("new_rsi : ", rsi_list[n])
+                #다시 돌파시 물타기
+                #elif (count3 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime3):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_2, 50000)
+                #        #구매시간 갱신
+                #        buytime3 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                    
+                #4번구매코인 익절/손절
+                if (count4 == 'false') :
+                    rsiindex(buycoin_3)
+                if (count4 == 'false') and (rsi > 70) :
+                    btc_3 = upbit.get_balance(buycoin_3[4:])
+                    upbit.sell_market_order(buycoin_3, btc_3)
+                    count4 = 'true'
+                #다시 돌파시 물타기
+                #elif (count4 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime4):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_3, 50000)
+                #        #구매시간 갱신
+                #        buytime4 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #5번구매코인 익절/손절
+                if (count5 == 'false') :
+                    rsiindex(buycoin_4)
+                if (count5 == 'false') and (rsi > 70) :
+                    btc_4 = upbit.get_balance(buycoin_4[4:])
+                    upbit.sell_market_order(buycoin_4, btc_4)
+                    count5 = 'true'
+                #다시 돌파시 물타기
+                #elif (count5 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime5):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_4, 50000)
+                #        #구매시간 갱신
+                #        buytime5 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #6번구매코인 익절/손절
+                if (count6 == 'false') :
+                    rsiindex(buycoin_5)
+                if (count6 == 'false') and (rsi > 70) :
+                    btc_5 = upbit.get_balance(buycoin_5[4:])
+                    upbit.sell_market_order(buycoin_5, btc_5)
+                    count6 = 'true'
+                #다시 돌파시 물타기
+                #elif (count6 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime6):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_5, 50000)
+                #        #구매시간 갱신
+                #        buytime6 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #7번구매코인 익절/손절
+                if (count7 == 'false') :
+                    rsiindex(buycoin_6)
+                if (count7 == 'false') and (rsi > 70) :
+                    btc_6 = upbit.get_balance(buycoin_6[4:])
+                    upbit.sell_market_order(buycoin_6, btc_6)
+                    count7 = 'true'
+                #다시 돌파시 물타기
+                #elif (count7 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime7):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_6, 50000)
+                #        #구매시간 갱신
+                #        buytime7 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #8번구매코인 익절/손절
+                if (count8 == 'false') :
+                    rsiindex(buycoin_7)
+                if (count8 == 'false') and (rsi > 70) :
+                    btc_7 = upbit.get_balance(buycoin_7[4:])
+                    upbit.sell_market_order(buycoin_7, btc_7)
+                    count8 = 'true'
+                #다시 돌파시 물타기
+                #elif (count8 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime8):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_7, 50000)
+                #        #구매시간 갱신
+                #        buytime8 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #9번구매코인 익절/손절
+                if (count9 == 'false') :
+                    rsiindex(buycoin_8)
+                if (count9 == 'false') and (rsi > 70) :
+                    btc_8 = upbit.get_balance(buycoin_8[4:])
+                    upbit.sell_market_order(buycoin_8, btc_8)
+                    count9 = 'true'
+                #다시 돌파시 물타기
+                #elif (count9 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime9):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_8, 50000)
+                #        #구매시간 갱신
+                #        buytime9 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
+                        
+                #10번구매코인 익절/손절
+                if (count10 == 'false') :
+                    rsiindex(buycoin_9)
+                if (count10 == 'false') and (rsi > 70) :
+                    btc_9 = upbit.get_balance(buycoin_9[4:])
+                    upbit.sell_market_order(buycoin_9, btc_9)
+                    count10 = 'true'
+                #다시 돌파시 물타기
+                #elif (count10 == 'false') and (30 > oldrsi) and (30 < rsi) and (now > buytime10):
+                #    krw = get_balance("KRW")
+                #    if krw > 50000:
+                #        upbit.buy_market_order(buycoin_9, 50000)
+                #        #구매시간 갱신
+                #        buytime10 = datetime.datetime.now() + datetime.timedelta(minutes=4)
+                #        time.sleep(1)
             
             n = n+1
             time.sleep(1)
         except Exception as e:
             print(e)
             time.sleep(1)
-""" 
-price_gap_desc.sort(reverse=True) #내림차순 정렬
-price_gap_index_0 = price_gap.index(price_gap_desc[0]) #1번 상승코인
-price_gap_index_1 = price_gap.index(price_gap_desc[1]) #2번 상승코인
-price_gap_index_2 = price_gap.index(price_gap_desc[2]) #3번 상승코인
-print("price_gap_index_0", price_gap_index_0)
-print("제일높은수치0 : " ,price_name[price_gap_index_0], " : ", price_gap_desc[0])
-print("제일높은수치1 : " ,price_name[price_gap_index_1], " : ", price_gap_desc[1])
-print("제일높은수치2 : " ,price_name[price_gap_index_2], " : ", price_gap_desc[2])
-while True:
-    try:
-        rsiindex(price_name[price_gap_index_0])
-        if rsi < 25 and price_gap_desc[0] > 1.05 :
-            upbit.buy_market_order(price_name[price_gap_index_0], 10000)
-            print("1번구매")
-        rsiindex(price_name[price_gap_index_1])
-        if rsi < 25 and price_gap_desc[1] > 1.05 :
-            upbit.buy_market_order(price_name[price_gap_index_1], 10000)
-            print("2번구매")
-        rsiindex(price_name[price_gap_index_2])
-        if rsi < 25 and price_gap_desc[2] > 1.05 :
-            upbit.buy_market_order(price_name[price_gap_index_2], 10000)
-            print("3번구매")
-        time.sleep(1)
-    except Exception as e:
-        print(e)
-        time.sleep(1)
-n = 0
-while n < 112 : #총 코인 갯수
-    try:
-        coin = all_coin[n]
-        now = datetime.datetime.now()
-        start_time = get_start_time(coin)
-        end_time = start_time + datetime.timedelta(days=1)
-        print("진행중... :",  coin)
-        rsiindex(coin)
-        rsi_name.append(coin)
-        rsi_list.append(rsi)
-        rsi_list_desc.append(rsi)
-        
-        n = n+1
-        time.sleep(1)
-    except Exception as e:
-        print(e)
-        time.sleep(1)
-rsi_list_desc.sort() #오름차순 정렬
-price_gap_index_0 = rsi_list.index(rsi_list_desc[0])
-price_gap_index_1 = rsi_list.index(rsi_list_desc[1])
-price_gap_index_2 = rsi_list.index(rsi_list_desc[2])
-print("rsi_row_1 : " ,rsi_name[price_gap_index_0], " : ", rsi_list_desc[0])
-print("rsi_row_2 : " ,rsi_name[price_gap_index_1], " : ", rsi_list_desc[1])
-print("rsi_row_3 : " ,rsi_name[price_gap_index_2], " : ", rsi_list_desc[2])
-"""
