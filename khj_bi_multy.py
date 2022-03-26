@@ -192,8 +192,8 @@ while True:
             now = dt.datetime.now()
 
             #코인 롱 구매
-            #if (globals()['count_buy_{}'.format(i)] == 'true') and (30 > old_old_rsi) and (30 < old_rsi) and (30 < now_rsi):
-            if (globals()['count_buy_{}'.format(i)] == 'true'):
+            if (globals()['count_buy_{}'.format(i)] == 'true') and (30 > old_old_rsi) and (30 < old_rsi) and (30 < now_rsi):
+            #if (globals()['count_buy_{}'.format(i)] == 'true'):
                 #선물잔고조회
                 balance = binance.fetch_balance(params={"type": "future"})
                 #구매수량 계산 - 구매가*배율/코인가격
