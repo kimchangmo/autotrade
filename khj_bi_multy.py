@@ -12,6 +12,7 @@
 #시계 자동 동기화 적용 할것!!!
 
 #-----------테스트코드--------------------------------------------------------------------------
+from tkinter import Y
 import ccxt 
 #import pprint
 import time
@@ -154,17 +155,19 @@ coin_buy_index = 5
 delay_time = 17
 #구매가
 #####1만원 시작######
-globals()['buy_money_{}'.format(0)] = 0.01 #ETHUSDT
-globals()['buy_money_{}'.format(1)] = 0.24 #LTCUSDT
-globals()['buy_money_{}'.format(2)] = 0.013 #YFIIUSDT
-globals()['buy_money_{}'.format(3)] = 0.014 #MKRUSDT
-globals()['buy_money_{}'.format(4)] = 0.082 #BCHUSDT
+#globals()['buy_money_{}'.format(0)] = 0.01 #ETHUSDT
+#globals()['buy_money_{}'.format(1)] = 0.24 #LTCUSDT
+#globals()['buy_money_{}'.format(2)] = 0.013 #YFIIUSDT
+#globals()['buy_money_{}'.format(3)] = 0.014 #MKRUSDT
+#globals()['buy_money_{}'.format(4)] = 0.082 #BCHUSDT
 #####2만원 시작######
 #globals()['buy_money_{}'.format(0)] = 0.02 #ETHUSDT
 #globals()['buy_money_{}'.format(1)] = 0.48 #LTCUSDT
 #globals()['buy_money_{}'.format(2)] = 0.026 #YFIIUSDT
 #globals()['buy_money_{}'.format(3)] = 0.028 #MKRUSDT
 #globals()['buy_money_{}'.format(4)] = 0.164 #BCHUSDT
+#첫구매가(달러)
+first_buy_money = 16
 #배율
 all_leverage = 4
 
@@ -190,11 +193,19 @@ while True:
             now = dt.datetime.now()
 
             #코인 롱 구매
-            if (globals()['count_buy_{}'.format(i)] == 'true') and (30 > old_old_rsi) and (30 < old_rsi) and (30 < now_rsi):
+            #if (globals()['count_buy_{}'.format(i)] == 'true') and (30 > old_old_rsi) and (30 < old_rsi) and (30 < now_rsi):
+            if (globals()['count_buy_{}'.format(i)] == 'true'):
                 #선물잔고조회
                 balance = binance.fetch_balance(params={"type": "future"})
+                #구매수량 계산 - 구매가*배율/코인가격
+                client = r_Client(api_key=api_key, api_secret=secret)
+                globals()['buy_money_{}'.format(i)] = first_buy_money*all_leverage/float(client.futures_symbol_ticker(symbol=globals()['coin_{}'.format(i)])['price'])
+                #소수점3째자리로 자르기
+                globals()['buy_money_{}'.format(i)] = round(globals()['buy_money_{}'.format(i)],3)
+                #print(globals()['coin_{}'.format(i)], globals()['buy_money_{}'.format(i)])
                 
-                if (globals()['buy_money_{}'.format(i)] < balance['USDT']['free']) :
+                if (first_buy_money < balance['USDT']['free']):
+                    globals()['last_buy_money_{}'.format(i)] = first_buy_money
                     print('코인(롱) :', globals()['coin_{}'.format(i)])
                     #코인 현재가
                     client = r_Client(api_key=api_key, api_secret=secret)
@@ -228,7 +239,15 @@ while True:
             if (globals()['count_sell_{}'.format(i)] == 'true') and (70 < old_old_rsi) and (70 > old_rsi) and (70 > now_rsi):
                 #선물잔고조회
                 balance = binance.fetch_balance(params={"type": "future"})
-                if (globals()['buy_money_{}'.format(i)] < balance['USDT']['free']) :
+                #구매수량 계산 - 구매가*배율/코인가격
+                client = r_Client(api_key=api_key, api_secret=secret)
+                globals()['buy_money_{}'.format(i)] = first_buy_money*all_leverage/float(client.futures_symbol_ticker(symbol=globals()['coin_{}'.format(i)])['price'])
+                #소수점3째자리로 자르기
+                globals()['buy_money_{}'.format(i)] = round(globals()['buy_money_{}'.format(i)],3)
+                #print(globals()['coin_{}'.format(i)], globals()['buy_money_{}'.format(i)])
+
+                if (first_buy_money < balance['USDT']['free']) :
+                    globals()['last_sell_money_{}'.format(i)] = first_buy_money
                     print('코인(숏) :', globals()['coin_{}'.format(i)])
                     #코인 현재가
                     client = r_Client(api_key=api_key, api_secret=secret)          
@@ -307,7 +326,8 @@ while True:
                 #balance = binance.fetch_balance()
                 #print(balance['USDT']['used'])
                 
-                if (float(globals()['buy_money_buy_{}'.format(i)])*2 < balance['USDT']['free']) :
+                if (globals()['last_buy_money_{}'.format(i)]*2 < balance['USDT']['free']) :
+                    globals()['last_buy_money_{}'.format(i)] = globals()['last_buy_money_{}'.format(i)]*2
                     #레버리지 설정
                     client.futures_change_leverage(symbol = globals()['coin_{}'.format(i)], leverage = all_leverage)
                     #구매
@@ -358,7 +378,8 @@ while True:
                 #balance = binance.fetch_balance()
                 #print(balance['USDT']['used'])
                 
-                if (globals()['buy_money_buy_{}'.format(i)]*2 < balance['USDT']['free']) :
+                if (globals()['last_buy_money_{}'.format(i)]*2 < balance['USDT']['free']) :
+                    globals()['last_buy_money_{}'.format(i)] = globals()['last_buy_money_{}'.format(i)]*2
                     #레버리지 설정
                     client.futures_change_leverage(symbol = globals()['coin_{}'.format(i)], leverage = all_leverage)
                     #구매
@@ -408,7 +429,8 @@ while True:
                 #balance = binance.fetch_balance()
                 #print(balance['USDT']['used'])
                 
-                if (globals()['buy_money_sell_{}'.format(i)]*2 < balance['USDT']['free']) :
+                if (globals()['last_sell_money_{}'.format(i)]*2 < balance['USDT']['free']) :
+                    globals()['last_sell_money_{}'.format(i)] = globals()['last_sell_money_{}'.format(i)]*2
                     #레버리지 설정
                     client.futures_change_leverage(symbol = globals()['coin_{}'.format(i)], leverage = all_leverage)
                     #구매
@@ -459,7 +481,8 @@ while True:
                 #balance = binance.fetch_balance()
                 #print(balance['USDT']['used'])
                 
-                if (globals()['buy_money_sell_{}'.format(i)]*2 < balance['USDT']['free']) :
+                if (globals()['last_sell_money_{}'.format(i)]*2 < balance['USDT']['free']) :
+                    globals()['last_sell_money_{}'.format(i)] = globals()['last_sell_money_{}'.format(i)]*2
                     #레버리지 설정
                     client.futures_change_leverage(symbol = globals()['coin_{}'.format(i)], leverage = all_leverage)
                     #구매
@@ -502,7 +525,6 @@ while True:
                     print('')
 
                     time.sleep(1)    
-
             
             i = i+1
             time.sleep(2)
