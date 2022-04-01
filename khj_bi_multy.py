@@ -142,7 +142,7 @@ def rsi(symbol):
     
 all_coin = []
 
-all_coin.append('ETHUSDT')
+all_coin.append('DOTUSDT')
 all_coin.append('LTCUSDT')
 all_coin.append('YFIIUSDT')
 all_coin.append('MKRUSDT')
